@@ -3,7 +3,10 @@
 DynamixelTest::DynamixelTest(void) : private_nh_("~")
 {
   private_nh_.param<double>("hz", HZ_, 10.0);
-  is_roll_pitch_received_ = false;
+  private_nh_.param<bool>("is_use_joy", is_use_joy_, true);
+  private_nh_.param("file_name", file_name_, std::string("roll_pitch.csv"));
+
+  is_roll_pitch_received_ = true;
 
   roll_pitch_sub_ = nh_.subscribe("/roll_pitch", 1, &DynamixelTest::RollPitchCallback, this);
   dynamixel_cmd_pub_ = nh_.advertise<trajectory_msgs::JointTrajectory>("dynamixel_workbench/joint_trajectory", 1);
@@ -24,15 +27,29 @@ DynamixelTest::DynamixelTest(void) : private_nh_("~")
 void DynamixelTest::process()
 {
   ros::Rate loop_rate(HZ_);
+  FILE *fp;
+  fp = fopen(file_name_.c_str(), "w");
   double roll = M_PI / 2.0;
+  double time = 0.1;
 
   while (ros::ok())
   {
-    if (is_roll_pitch_received_)
+    if (is_roll_pitch_received_ )
     {
-      roll = roll_to_rad(roll_pitch_msg_.roll);
-      ROS_INFO_STREAM("Roll: " << roll);
-      dynamixel_cmd_.points[0].positions[0] = roll;
+      if(is_use_joy_) {
+        roll = roll_to_rad(roll_pitch_msg_.roll);
+        // ROS_INFO_STREAM("Roll: " << roll);
+        dynamixel_cmd_.points[0].positions[0] = roll;
+      }
+      else {
+        roll = roll_to_rad(M_PI/18.0 * sin(time)); 
+        // ROS_INFO_STREAM("Roll: " << roll);
+        dynamixel_cmd_.points[0].positions[0] = roll;
+        time += 0.1;
+      }
+      dynamixel_cmd_.header.stamp = ros::Time::now();
+      double time = ros::Time::now().toSec();
+      fprintf(fp, "%lf, %f, %f\n", time, roll_pitch_msg_.roll, dynamixel_cmd_.points[0].positions[0]);
       dynamixel_cmd_pub_.publish(dynamixel_cmd_);
     }
 

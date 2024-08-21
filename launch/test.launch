@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="dynamixel_test" type="dynamixel_test_node" name="dynamixel_test" output="screen" />
+  <include file="$(find ccv_sim)/launch/ccv_sim_sub.launch"/>
+  <include file="$(find dynamixel_workbench_controllers)/launch/dynamixel_controllers.launch"/>
+</launch>

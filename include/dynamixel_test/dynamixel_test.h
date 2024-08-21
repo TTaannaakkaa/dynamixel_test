@@ -5,6 +5,7 @@
 #include <sq2_ccv_roll_pitch_msgs/RollPitch.h>
 #include <dynamixel_workbench_msgs/DynamixelStateList.h>
 #include <trajectory_msgs/JointTrajectory.h>
+#include <math.h>
 
 class DynamixelTest
 {
@@ -20,6 +21,8 @@ private:
 
   double HZ_;
   bool is_roll_pitch_received_;
+  bool is_use_joy_;
+  std::string file_name_;
 
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
